@@ -32,8 +32,19 @@
       <!-- todo list -->
       <ul>
         <li v-for="todo in todos" :key="todo.id">
-          <span class="completed">{{todo.title}}</span>
-          <input type="button" value="标为完成" />
+          <span :class="{completed:todo.isCompleted}">{{todo.title}}</span>
+          <input
+            type="button"
+            value="标为完成"
+            @click="markAsCompleted(todo)"
+            v-show="!todo.isCompleted"
+          />
+          <input
+            type="button"
+            value="标为未完成"
+            @click="markAsIncompleted(todo)"
+            v-show="todo.isCompleted"
+          />
           <input type="button" value="删除" />
           <input type="text" value="编辑 todo..." />
         </li>
@@ -65,15 +76,24 @@
         },
         methods: {
           addTodo: function () {
-            if(this.newTodoTitle === ""){
+            if (this.newTodoTitle === "") {
               this.isBorderShow = true;
               return;
             } else {
-              this.todos.push({ id: id++, title: this.newTodoTitle });
+              this.todos.push({
+                id: id++,
+                title: this.newTodoTitle,
+                isCompleted: false,
+              });
               this.newTodoTitle = "";
               this.isBorderShow = false;
             }
-
+          },
+          markAsCompleted: function (obj) {
+            obj.isCompleted = true;
+          },
+          markAsIncompleted: function (obj) {
+            obj.isCompleted = false;
           },
         },
       });
