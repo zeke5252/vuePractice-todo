@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vue Todo</title>
+    <style>
+      .completed {
+        text-decoration: line-through;
+      }
+
+      .selected {
+        color: red;
+      }
+      .border {
+        border: 1px solid red;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="todo-app">
+      <div>
+        <input type="button" value="全部标为完成" />
+        <input
+          type="text"
+          placeholder="添加 todo"
+          v-model="newTodoTitle"
+          @keyup.enter="addTodo"
+          :class="{border:isBorderShow}"
+        />
+      </div>
+      <!-- todo list -->
+      <ul>
+        <li v-for="todo in todos" :key="todo.id">
+          <span class="completed">{{todo.title}}</span>
+          <input type="button" value="标为完成" />
+          <input type="button" value="删除" />
+          <input type="text" value="编辑 todo..." />
+        </li>
+      </ul>
+      <!-- end todo list -->
+      <div>
+        <span>剩余 3 项未完成 ---</span>
+        <span
+          >筛选：
+          <input type="button" class="selected" value="全部" />
+          <input type="button" value="进行中" />
+          <input type="button" value="已完成" />
+          <input type="button" value="清除已完成" />
+          <input type="button" value="清除全部" />
+        </span>
+      </div>
+    </div>
+    <script>
+      let id = 0;
+      let vm = new Vue({
+        el: "#todo-app",
+        data: function () {
+          return {
+            id: 0,
+            todos: [],
+            newTodoTitle: "",
+            isBorderShow: false,
+          };
+        },
+        methods: {
+          addTodo: function () {
+            if(this.newTodoTitle === ""){
+              this.isBorderShow = true;
+              return;
+            } else {
+              this.todos.push({ id: id++, title: this.newTodoTitle });
+              this.newTodoTitle = "";
+              this.isBorderShow = false;
+            }
+
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
