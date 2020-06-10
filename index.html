@@ -20,7 +20,7 @@
   <body>
     <div id="todo-app">
       <div>
-        <input type="button" value="全部标为完成" />
+        <input type="button" value="全部标为完成" @click="markAllCompleted" />
         <input
           type="text"
           placeholder="添加 todo"
@@ -31,8 +31,21 @@
       </div>
       <!-- todo list -->
       <ul>
-        <li v-for="todo in todos" :key="todo.id">
-          <span :class="{completed:todo.isCompleted}">{{todo.title}}</span>
+        <li v-for="todo in sortTodo" :key="todo.id">
+          <span
+            :class="{completed:todo.isCompleted}"
+            @dblclick="saveTempVal(todo)"
+            v-show="!editedTodo"
+            >{{todo.title}}</span
+          >
+          <input
+            type="text"
+            v-if="editedTodo && editedTodo.id === todo.id "
+            v-model="todo.title"
+            @keyup.enter="editDone(todo)"
+            @keyup.esc="editCancel(todo)"
+            v-focus
+          />
           <input
             type="button"
             value="标为完成"
@@ -45,24 +58,32 @@
             @click="markAsIncompleted(todo)"
             v-show="todo.isCompleted"
           />
-          <input type="button" value="删除" />
-          <input type="text" value="编辑 todo..." />
+          <input type="button" value="删除" @click="removeTodo(todo)" />
         </li>
       </ul>
       <!-- end todo list -->
       <div>
-        <span>剩余 3 项未完成 ---</span>
+        <span>剩余{{countLeft}}项未完成 ---</span>
         <span
           >筛选：
-          <input type="button" class="selected" value="全部" />
-          <input type="button" value="进行中" />
-          <input type="button" value="已完成" />
+          <input type="button" class="selected" value="全部" 
+          @click="sortCatag='all'"
+          />
+          <input
+            type="button"
+            value="进行中"
+            @click="sortCatag='inCompleted'"
+          />
+          <input type="button" value="已完成" 
+          @click="sortCatag='completed'"
+          />
           <input type="button" value="清除已完成" />
           <input type="button" value="清除全部" />
         </span>
       </div>
     </div>
     <script>
+      // 寫下在標題改變前的變化供後使用，如果不改了或確定要改的時候可以用
       let id = 0;
       let vm = new Vue({
         el: "#todo-app",
@@ -72,6 +93,8 @@
             todos: [],
             newTodoTitle: "",
             isBorderShow: false,
+            editedTodo: null,
+            sortCatag: "inCompleted",
           };
         },
         methods: {
@@ -94,6 +117,58 @@
           },
           markAsIncompleted: function (obj) {
             obj.isCompleted = false;
+          },
+          removeTodo: function (todo) {
+            let yes = confirm("你確定要刪除嗎？");
+            yes ? this.todos.splice(this.todos.indexOf(todo), 1) : {};
+          },
+          saveTempVal: function (todo) {
+            this.editedTodo = {
+              id: todo.id,
+              title: todo.title,
+              isCompleted: todo.isCompleted,
+            };
+          },
+          editDone: function (todo) {
+            this.editedTodo = null;
+          },
+          editCancel: function (todo) {
+            todo.title = this.editedTodo.title;
+            this.editedTodo = null;
+          },
+          markAllCompleted: function () {
+            this.todos.forEach((todo) => {
+              todo.isCompleted = true;
+            });
+            // console.log('todos=', this.todos[0].isCompleted)
+          },
+        },
+        directives: {
+          focus: {
+            bind: function (el) {
+              el.focus();
+            },
+          },
+        },
+        computed: {
+          countLeft: function () {
+            let tempArr = this.todos.filter(
+              (todo) => todo.isCompleted === false
+            );
+            return tempArr.length;
+          },
+          sortTodo: function () {
+            if (this.sortCatag === "all") {
+              console.log(this.todos);
+              return this.todos;
+            } else if (this.sortCatag === "inCompleted") {
+              console.log(
+                this.todos.filter((todo) => todo.isCompleted === false)
+              );
+              return this.todos.filter((todo) => todo.isCompleted === false);
+            } else {
+              return this.todos.filter((todo) => todo.isCompleted === true);
+            }
           },
         },
       });
