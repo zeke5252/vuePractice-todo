@@ -23,7 +23,7 @@
         <input type="button" value="全部标为完成" @click="markAllCompleted" />
         <input
           type="text"
-          placeholder="添加 todo"
+          placeholder="添加 todo 然後按enter"
           v-model="newTodoTitle"
           @keyup.enter="addTodo"
           :class="{border:isBorderShow}"
@@ -62,28 +62,35 @@
         </li>
       </ul>
       <!-- end todo list -->
-      <div>
+      <div v-if="todos.length>0 ? true : false">
         <span>剩余{{countLeft}}项未完成 ---</span>
         <span
           >筛选：
-          <input type="button" class="selected" value="全部" 
-          @click="sortCatag='all'"
+          <input
+            type="button"
+            :class="{selected: sortCatag==='all'}"
+            value="全部"
+            @click="sortCatag='all'"
           />
           <input
             type="button"
             value="进行中"
+            :class="{selected: sortCatag==='inCompleted'}"
             @click="sortCatag='inCompleted'"
           />
-          <input type="button" value="已完成" 
-          @click="sortCatag='completed'"
+          <input
+            type="button"
+            value="已完成"
+            :class="{selected: sortCatag==='completed'}"
+            @click="sortCatag='completed'"
           />
-          <input type="button" value="清除已完成" />
-          <input type="button" value="清除全部" />
+          <input type="button" value="清除已完成" @click="removeCompleted" />
+          <input type="button" value="清除全部" @click="removeAll" />
+          <p v-if="!countLeft">挖你通通都完成了，好認真！</p>
         </span>
       </div>
     </div>
     <script>
-      // 寫下在標題改變前的變化供後使用，如果不改了或確定要改的時候可以用
       let id = 0;
       let vm = new Vue({
         el: "#todo-app",
@@ -94,7 +101,7 @@
             newTodoTitle: "",
             isBorderShow: false,
             editedTodo: null,
-            sortCatag: "inCompleted",
+            sortCatag: "all",
           };
         },
         methods: {
@@ -140,7 +147,15 @@
             this.todos.forEach((todo) => {
               todo.isCompleted = true;
             });
-            // console.log('todos=', this.todos[0].isCompleted)
+          },
+          removeAll: function () {
+            let yes = confirm("你真的要刪除所有的代辦事項嗎？");
+            yes ? (this.todos = []) : {};
+          },
+          removeCompleted: function () {
+            this.todos = this.todos.filter(
+              (todo) => todo.isCompleted === false
+            );
           },
         },
         directives: {
@@ -158,13 +173,10 @@
             return tempArr.length;
           },
           sortTodo: function () {
+            // 注意到像這邊處理的列表沒有真正的刪除掉todos，因為他只是篩選
             if (this.sortCatag === "all") {
-              console.log(this.todos);
               return this.todos;
             } else if (this.sortCatag === "inCompleted") {
-              console.log(
-                this.todos.filter((todo) => todo.isCompleted === false)
-              );
               return this.todos.filter((todo) => todo.isCompleted === false);
             } else {
               return this.todos.filter((todo) => todo.isCompleted === true);
