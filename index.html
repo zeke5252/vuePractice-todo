@@ -91,17 +91,28 @@
       </div>
     </div>
     <script>
-      let id = 0;
+      let dataStorage = {
+        fetch: function () {
+          let result = JSON.parse(localStorage.getItem("myTodoApp") || "[]");
+          // 這邊的思路是產生一個整個storage的id已經到哪，讓其後新增todo的時候要賦予的id有真實的依據，不然每次新增都從0開始，就會錯誤
+          dataStorage.startId = result.length;
+          return result;
+        },
+        save: function () {
+          localStorage.setItem("myTodoApp", JSON.stringify(vm.todos));
+        },
+      };
       let vm = new Vue({
         el: "#todo-app",
         data: function () {
           return {
             id: 0,
-            todos: [],
+            todos: dataStorage.fetch(),
             newTodoTitle: "",
             isBorderShow: false,
             editedTodo: null,
             sortCatag: "all",
+            papa: this.haha,
           };
         },
         methods: {
@@ -111,27 +122,36 @@
               return;
             } else {
               this.todos.push({
-                id: id++,
+                id: dataStorage.startId++,
                 title: this.newTodoTitle,
                 isCompleted: false,
               });
               this.newTodoTitle = "";
               this.isBorderShow = false;
+              dataStorage.save();
             }
           },
           markAsCompleted: function (obj) {
             obj.isCompleted = true;
+            dataStorage.save();
           },
           markAsIncompleted: function (obj) {
             obj.isCompleted = false;
+            dataStorage.save();
           },
           removeTodo: function (todo) {
             let yes = confirm("你確定要刪除嗎？");
-            yes ? this.todos.splice(this.todos.indexOf(todo), 1) : {};
+            if (yes) {
+              this.todos.splice(this.todos.indexOf(todo), 1);
+              this.todos.map((todo, index) => {
+                todo.id = index;
+              });
+              dataStorage.save();
+            }
           },
           saveTempVal: function (todo) {
             this.editedTodo = {
-              id: todo.id,
+              id: dataStorage.startId,
               title: todo.title,
               isCompleted: todo.isCompleted,
             };
@@ -147,15 +167,24 @@
             this.todos.forEach((todo) => {
               todo.isCompleted = true;
             });
+            dataStorage.save();
           },
           removeAll: function () {
             let yes = confirm("你真的要刪除所有的代辦事項嗎？");
-            yes ? (this.todos = []) : {};
+            if (yes) {
+              this.todos = [];
+              dataStorage.startId = 0;
+              dataStorage.save();
+            }
           },
           removeCompleted: function () {
             this.todos = this.todos.filter(
               (todo) => todo.isCompleted === false
             );
+            this.todos.map((todo, index) => {
+                todo.id = index;
+              });
+            dataStorage.save();
           },
         },
         directives: {
@@ -182,6 +211,9 @@
               return this.todos.filter((todo) => todo.isCompleted === true);
             }
           },
+        },
+        beforeCreate: function () {
+          let haha = "hahaha";
         },
       });
     </script>
