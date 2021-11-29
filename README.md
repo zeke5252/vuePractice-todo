@@ -4,4 +4,4 @@ I didn't fully copy how the author implemented the app. Most of the time I thoug
 This practice still helped me a lot because it teached me how the Vue works and how the author thinks.  
 1234
 Test update777
-ddd
+dd8d
