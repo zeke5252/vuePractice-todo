@@ -128,7 +128,7 @@
               });
               this.newTodoTitle = "";
               this.isBorderShow = false;
-              dataStorage.save();
+
             }
           },
           markAsCompleted: function (obj) {
@@ -143,10 +143,12 @@
             let yes = confirm("你確定要刪除嗎？");
             if (yes) {
               this.todos.splice(this.todos.indexOf(todo), 1);
+              // 刪除項目後，id就不正確了，所以我們要讓整個id依據正確的數量更新一次（類似刪除的操作都要這麼做）
               this.todos.map((todo, index) => {
                 todo.id = index;
               });
-              dataStorage.save();
+              // 放到localstorage上
+
             }
           },
           saveTempVal: function (todo) {
@@ -174,7 +176,7 @@
             if (yes) {
               this.todos = [];
               dataStorage.startId = 0;
-              dataStorage.save();
+
             }
           },
           removeCompleted: function () {
@@ -182,8 +184,8 @@
               (todo) => todo.isCompleted === false
             );
             this.todos.map((todo, index) => {
-                todo.id = index;
-              });
+              todo.id = index;
+            });
             dataStorage.save();
           },
         },
@@ -212,9 +214,12 @@
             }
           },
         },
-        beforeCreate: function () {
-          let haha = "hahaha";
-        },
+        // 這可以拿來監控某資料是否有變動，一有變動就執行某操作，可以省下很多到處重寫的麻煩
+        watch: {
+          todos: function(){
+            dataStorage.save();
+          }
+        }
       });
     </script>
   </body>
